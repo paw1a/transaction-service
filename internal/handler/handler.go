@@ -10,13 +10,16 @@ import (
 )
 
 type Handler struct {
-	clientService service.Clients
+	clientService      service.Clients
+	transactionService service.Transactions
 }
 
 func NewHandler(conn *sqlx.DB) *Handler {
 	clientRepo := repository.NewClientRepo(conn)
+	transactionRepo := repository.NewTransactionRepo(conn)
 	return &Handler{
-		clientService: service.NewClientService(clientRepo),
+		clientService:      service.NewClientService(clientRepo),
+		transactionService: service.NewTransactionService(transactionRepo),
 	}
 }
 
@@ -43,6 +46,13 @@ func (h *Handler) initAPI(router *gin.Engine) {
 			clientsApi.GET("/:id", h.clientFindById)
 			clientsApi.POST("/", h.clientCreate)
 			clientsApi.DELETE("/:id", h.clientDelete)
+		}
+
+		transactionApi := api.Group("/transactions")
+		{
+			transactionApi.GET("/", h.transactionFindAll)
+			transactionApi.GET("/:id", h.transactionFindById)
+			transactionApi.POST("/", h.transactionCreate)
 		}
 	}
 }

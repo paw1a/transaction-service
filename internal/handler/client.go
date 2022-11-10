@@ -32,13 +32,13 @@ func (h *Handler) clientFindById(context *gin.Context) {
 		return
 	}
 
-	product, err := h.clientService.FindByID(context.Request.Context(), id)
+	client, err := h.clientService.FindByID(context.Request.Context(), id)
 	if err != nil {
 		internalErrorResponse(context, fmt.Errorf("client with id: %d not found", id))
 		return
 	}
 
-	successResponse(context, product)
+	successResponse(context, client)
 }
 
 func (h *Handler) clientCreate(context *gin.Context) {
@@ -49,13 +49,13 @@ func (h *Handler) clientCreate(context *gin.Context) {
 		return
 	}
 
-	product, err := h.clientService.Create(context.Request.Context(), clientDto)
+	client, err := h.clientService.Create(context.Request.Context(), clientDto)
 	if err != nil {
 		errorResponse(context, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	createdResponse(context, product)
+	createdResponse(context, client)
 }
 
 func (h *Handler) clientDelete(context *gin.Context) {

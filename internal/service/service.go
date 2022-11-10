@@ -12,3 +12,9 @@ type Clients interface {
 	Create(ctx context.Context, clientDto dto.CreateClientDto) (domain.Client, error)
 	Delete(ctx context.Context, clientId int) error
 }
+
+type Transactions interface {
+	FindAll(ctx context.Context) ([]domain.Transaction, error)
+	FindByID(ctx context.Context, transactionId int) (domain.Transaction, error)
+	Create(ctx context.Context, transactionDto dto.CreateTransactionDto) (domain.Transaction, error)
+}

@@ -11,5 +11,6 @@ create table transactions (
     foreign key (sender_id) references clients (id),
     foreign key (receiver_id) references clients (id),
     amount bigint not null,
-    status varchar(30) not null
+    status varchar(30) not null,
+    updated_at timestamp not null default now()
 )
