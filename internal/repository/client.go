@@ -11,19 +11,31 @@ type ClientRepo struct {
 }
 
 func (c *ClientRepo) FindAll(ctx context.Context) ([]domain.Client, error) {
-	return nil, nil
+	var clients []domain.Client
+	statement := "select * from clients"
+	err := c.conn.SelectContext(ctx, &clients, statement)
+	return clients, err
 }
 
 func (c *ClientRepo) FindByID(ctx context.Context, clientId int) (domain.Client, error) {
-	return domain.Client{}, nil
+	statement := "select * from clients where id = $1"
+	var client domain.Client
+	err := c.conn.GetContext(ctx, &client, statement, clientId)
+	return client, err
 }
 
-func (c *ClientRepo) Create(ctx context.Context, user domain.Client) (domain.Client, error) {
-	return domain.Client{}, nil
+func (c *ClientRepo) Create(ctx context.Context, client domain.Client) (domain.Client, error) {
+	statement := "insert into clients (name, balance) values ($1, $2) returning id"
+	var id int64
+	err := c.conn.QueryRowxContext(ctx, statement, client.Name, client.Balance).Scan(&id)
+	client.Id = id
+	return client, err
 }
 
 func (c *ClientRepo) Delete(ctx context.Context, clientId int) error {
-	return nil
+	statement := "delete from clients where id = $1"
+	_, err := c.conn.ExecContext(ctx, statement, clientId)
+	return err
 }
 
 func NewClientRepo(conn *sqlx.DB) *ClientRepo {

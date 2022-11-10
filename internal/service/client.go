@@ -12,19 +12,22 @@ type ClientService struct {
 }
 
 func (c *ClientService) FindAll(ctx context.Context) ([]domain.Client, error) {
-	return nil, nil
+	return c.repo.FindAll(ctx)
 }
 
 func (c *ClientService) FindByID(ctx context.Context, clientId int) (domain.Client, error) {
-	return domain.Client{}, nil
+	return c.repo.FindByID(ctx, clientId)
 }
 
 func (c *ClientService) Create(ctx context.Context, clientDto dto.CreateClientDto) (domain.Client, error) {
-	return domain.Client{}, nil
+	return c.repo.Create(ctx, domain.Client{
+		Name:    clientDto.Name,
+		Balance: clientDto.Balance,
+	})
 }
 
 func (c *ClientService) Delete(ctx context.Context, clientId int) error {
-	return nil
+	return c.repo.Delete(ctx, clientId)
 }
 
 func NewClientService(repo repository.Clients) *ClientService {
