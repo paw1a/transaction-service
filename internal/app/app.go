@@ -13,8 +13,6 @@ import (
 func Run() {
 	log.Info("application startup...")
 
-	fmt.Printf("%s\n", os.Getenv("PORT"))
-
 	conn, err := db.NewDB()
 	if err != nil {
 		log.Fatal(err)

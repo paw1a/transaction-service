@@ -37,6 +37,12 @@ func (h *Handler) Init() *gin.Engine {
 func (h *Handler) initAPI(router *gin.Engine) {
 	api := router.Group("/api")
 	{
-		api.GET("/clients")
+		clientsApi := api.Group("/clients")
+		{
+			clientsApi.GET("/", h.clientFindAll)
+			clientsApi.GET("/:id", h.clientFindById)
+			clientsApi.POST("/", h.clientCreate)
+			clientsApi.DELETE("/:id", h.clientDelete)
+		}
 	}
 }
