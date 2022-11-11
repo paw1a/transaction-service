@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/paw1a/transaction-service/internal/domain"
 )
@@ -39,7 +40,36 @@ func (c *ClientRepo) Delete(ctx context.Context, clientId int) error {
 }
 
 func (c *ClientRepo) Transfer(senderId int64, receiverId int64, amount int64) error {
-	return nil
+	tx, err := c.conn.BeginTx(context.Background(), nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	var statement string
+	var balance int64
+	statement = "select balance from clients where id = $1"
+	tx.QueryRowContext(context.Background(), statement, senderId).Scan(&balance)
+	if balance < amount {
+		return fmt.Errorf("not enough money: balance = %d, amount = %d", balance, amount)
+	}
+
+	statement = "update clients set balance = $1 where id = $2"
+	_, err = tx.Exec(statement, balance-amount, senderId)
+	if err != nil {
+		return err
+	}
+
+	statement = "select balance from clients where id = $1"
+	tx.QueryRowContext(context.Background(), statement, receiverId).Scan(&balance)
+
+	statement = "update clients set balance = $1 where id = $2"
+	_, err = tx.Exec(statement, balance+amount, receiverId)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func NewClientRepo(conn *sqlx.DB) *ClientRepo {
