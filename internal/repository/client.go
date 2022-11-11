@@ -38,6 +38,10 @@ func (c *ClientRepo) Delete(ctx context.Context, clientId int) error {
 	return err
 }
 
+func (c *ClientRepo) Transfer(senderId int64, receiverId int64, amount int64) error {
+	return nil
+}
+
 func NewClientRepo(conn *sqlx.DB) *ClientRepo {
 	return &ClientRepo{
 		conn: conn,

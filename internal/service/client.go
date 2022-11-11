@@ -30,6 +30,10 @@ func (c *ClientService) Delete(ctx context.Context, clientId int) error {
 	return c.repo.Delete(ctx, clientId)
 }
 
+func (c *ClientService) Transfer(senderId int64, receiverId int64, amount int64) error {
+	return c.repo.Transfer(senderId, receiverId, amount)
+}
+
 func NewClientService(repo repository.Clients) *ClientService {
 	return &ClientService{
 		repo: repo,

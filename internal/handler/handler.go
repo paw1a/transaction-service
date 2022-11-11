@@ -17,9 +17,12 @@ type Handler struct {
 func NewHandler(conn *sqlx.DB) *Handler {
 	clientRepo := repository.NewClientRepo(conn)
 	transactionRepo := repository.NewTransactionRepo(conn)
+
+	clientService := service.NewClientService(clientRepo)
+	transactionService := service.NewTransactionService(transactionRepo, clientService)
 	return &Handler{
-		clientService:      service.NewClientService(clientRepo),
-		transactionService: service.NewTransactionService(transactionRepo),
+		clientService:      clientService,
+		transactionService: transactionService,
 	}
 }
 

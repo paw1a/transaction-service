@@ -41,6 +41,13 @@ func (c *TransactionRepo) UpdateStatus(ctx context.Context, transactionId int64,
 	return err
 }
 
+func (c *TransactionRepo) FindByStatusAndId(ctx context.Context, status string, id int64) ([]domain.Transaction, error) {
+	var transactions []domain.Transaction
+	statement := "select * from transactions where id = $1 and status = $2"
+	err := c.conn.SelectContext(ctx, &transactions, statement, id, status)
+	return transactions, err
+}
+
 func NewTransactionRepo(conn *sqlx.DB) *TransactionRepo {
 	return &TransactionRepo{
 		conn: conn,

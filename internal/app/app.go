@@ -26,7 +26,7 @@ func Run() {
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-	log.Infof("server started on port %s", os.Getenv("PORT"))
 
+	log.Infof("server started on port %s", os.Getenv("PORT"))
 	log.Fatal(server.ListenAndServe())
 }
