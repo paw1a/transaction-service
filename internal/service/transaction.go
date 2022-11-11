@@ -6,6 +6,7 @@ import (
 	"github.com/paw1a/transaction-service/internal/domain"
 	"github.com/paw1a/transaction-service/internal/domain/dto"
 	"github.com/paw1a/transaction-service/internal/repository"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -37,13 +38,21 @@ func (t *TransactionService) Create(ctx context.Context, transactionDto dto.Crea
 		return domain.Transaction{}, fmt.Errorf("transaction amount must be positive value")
 	}
 
-	return t.repo.Create(ctx, domain.Transaction{
+	transaction, err := t.repo.Create(ctx, domain.Transaction{
 		SenderId:   transactionDto.SenderId,
 		ReceiverId: transactionDto.ReceiverId,
 		Amount:     transactionDto.Amount,
 		UpdatedAt:  time.Now(),
 		Status:     "created",
 	})
+
+	if err != nil {
+		return domain.Transaction{}, err
+	}
+
+	t.clientQueues[int(transactionDto.SenderId)] <- transaction
+
+	return transaction, err
 }
 
 func (t *TransactionService) UpdateStatus(ctx context.Context, transactionId int64, status string) error {
@@ -53,8 +62,10 @@ func (t *TransactionService) UpdateStatus(ctx context.Context, transactionId int
 func (t *TransactionService) processTransaction(transaction domain.Transaction) error {
 	err := t.clientService.Transfer(transaction.SenderId, transaction.ReceiverId, transaction.Amount)
 	if err != nil {
+		log.Printf("failed to make transaction with id = %d: %v", transaction.Id, err)
 		err = t.UpdateStatus(context.Background(), transaction.Id, "blocked")
 	} else {
+		log.Printf("success transaction with id = %d", transaction.Id)
 		err = t.UpdateStatus(context.Background(), transaction.Id, "done")
 	}
 
@@ -92,12 +103,15 @@ func NewTransactionService(repo repository.Transactions, clientService Clients) 
 	for _, client := range clients {
 		id := int(client.Id)
 		clientQueues[id] = make(chan domain.Transaction, 64)
-		createdTransactions, err := transactionService.
-			FindByStatusAndId(context.Background(), "created", client.Id)
+		createdTransactions, err := transactionService.FindByStatusAndId(
+			context.Background(), "created", client.Id)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get client transactions with id: %d: %w",
 				client.Id, err)
 		}
+
+		log.Printf("client %d", client.Id)
+		log.Printf("transactions %v", createdTransactions)
 
 		for _, transaction := range createdTransactions {
 			clientQueues[id] <- transaction

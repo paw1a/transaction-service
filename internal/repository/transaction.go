@@ -13,7 +13,7 @@ type TransactionRepo struct {
 
 func (c *TransactionRepo) FindAll(ctx context.Context) ([]domain.Transaction, error) {
 	var transactions []domain.Transaction
-	statement := "select * from transactions"
+	statement := "select * from transactions order by id asc"
 	err := c.conn.SelectContext(ctx, &transactions, statement)
 	return transactions, err
 }
@@ -43,7 +43,7 @@ func (c *TransactionRepo) UpdateStatus(ctx context.Context, transactionId int64,
 
 func (c *TransactionRepo) FindByStatusAndId(ctx context.Context, status string, id int64) ([]domain.Transaction, error) {
 	var transactions []domain.Transaction
-	statement := "select * from transactions where id = $1 and status = $2"
+	statement := "select * from transactions where sender_id = $1 and status = $2 order by updated_at asc"
 	err := c.conn.SelectContext(ctx, &transactions, statement, id, status)
 	return transactions, err
 }

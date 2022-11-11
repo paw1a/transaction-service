@@ -13,4 +13,4 @@ create table transactions (
     amount bigint not null,
     status varchar(30) not null,
     updated_at timestamp not null default now()
-)
+);

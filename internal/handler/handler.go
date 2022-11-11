@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/paw1a/transaction-service/internal/repository"
 	"github.com/paw1a/transaction-service/internal/service"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -19,7 +20,11 @@ func NewHandler(conn *sqlx.DB) *Handler {
 	transactionRepo := repository.NewTransactionRepo(conn)
 
 	clientService := service.NewClientService(clientRepo)
-	transactionService := service.NewTransactionService(transactionRepo, clientService)
+	transactionService, err := service.NewTransactionService(transactionRepo, clientService)
+	if err != nil {
+		log.Fatalf("failed to init transaction service: %v", err)
+	}
+
 	return &Handler{
 		clientService:      clientService,
 		transactionService: transactionService,
