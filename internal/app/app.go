@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/paw1a/transaction-service/internal/db"
 	"github.com/paw1a/transaction-service/internal/handler"
+	_ "github.com/paw1a/transaction-service/internal/logging"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"

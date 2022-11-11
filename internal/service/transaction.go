@@ -109,9 +109,6 @@ func NewTransactionService(repo repository.Transactions, clientService Clients) 
 				client.Id, err)
 		}
 
-		log.Printf("client %d", id)
-		log.Printf("transactions %v", createdTransactions)
-
 		for _, transaction := range createdTransactions {
 			clientQueues[id] <- transaction
 		}
