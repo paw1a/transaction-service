@@ -21,10 +21,17 @@ func (c *ClientService) FindByID(ctx context.Context, clientId int) (domain.Clie
 }
 
 func (c *ClientService) Create(ctx context.Context, clientDto dto.CreateClientDto) (domain.Client, error) {
-	return c.repo.Create(ctx, domain.Client{
+	client, err := c.repo.Create(ctx, domain.Client{
 		Name:    clientDto.Name,
 		Balance: clientDto.Balance,
 	})
+	if err != nil {
+		return domain.Client{}, err
+	}
+
+	c.clientQueues[client.Id] = make(chan domain.Transaction, 64)
+
+	return client, err
 }
 
 func (c *ClientService) Delete(ctx context.Context, clientId int) error {
