@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/paw1a/transaction-service/internal/domain"
 	"github.com/paw1a/transaction-service/internal/domain/dto"
 	"github.com/paw1a/transaction-service/internal/repository"
@@ -21,6 +22,11 @@ func (c *TransactionService) FindByID(ctx context.Context, transactionId int) (d
 }
 
 func (c *TransactionService) Create(ctx context.Context, transactionDto dto.CreateTransactionDto) (domain.Transaction, error) {
+	if transactionDto.SenderId == transactionDto.ReceiverId {
+		return domain.Transaction{}, fmt.Errorf("transaction sender and receiver are the same: %d",
+			transactionDto.SenderId)
+	}
+
 	return c.repo.Create(ctx, domain.Transaction{
 		SenderId:   transactionDto.SenderId,
 		ReceiverId: transactionDto.ReceiverId,

@@ -37,11 +37,11 @@ func createdResponse(context *gin.Context, data interface{}) {
 func internalErrorResponse(context *gin.Context, err error) {
 	response := internalError{
 		Code:    http.StatusInternalServerError,
-		Message: "500 Internal Server Error, contact us to fix it",
+		Message: "500 Internal Server Error",
 		Error:   err,
 	}
 	log.Errorf("Something went wrong: %v", response.Error)
-	context.AbortWithStatusJSON(response.Code, response.Error)
+	context.AbortWithStatusJSON(response.Code, response.Error.Error())
 }
 
 func badRequestResponse(context *gin.Context, message string, err error) {
