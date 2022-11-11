@@ -12,6 +12,7 @@ type Clients interface {
 	Create(ctx context.Context, clientDto dto.CreateClientDto) (domain.Client, error)
 	Delete(ctx context.Context, clientId int) error
 	Transfer(senderId int64, receiverId int64, amount int64) error
+	GetClientQueues() map[int64]chan domain.Transaction
 }
 
 type Transactions interface {

@@ -8,7 +8,8 @@ import (
 )
 
 type ClientService struct {
-	repo repository.Clients
+	repo         repository.Clients
+	clientQueues map[int64]chan domain.Transaction
 }
 
 func (c *ClientService) FindAll(ctx context.Context) ([]domain.Client, error) {
@@ -34,8 +35,13 @@ func (c *ClientService) Transfer(senderId int64, receiverId int64, amount int64)
 	return c.repo.Transfer(senderId, receiverId, amount)
 }
 
+func (c *ClientService) GetClientQueues() map[int64]chan domain.Transaction {
+	return c.clientQueues
+}
+
 func NewClientService(repo repository.Clients) *ClientService {
 	return &ClientService{
-		repo: repo,
+		repo:         repo,
+		clientQueues: make(map[int64]chan domain.Transaction),
 	}
 }

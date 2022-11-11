@@ -13,7 +13,6 @@ import (
 type TransactionService struct {
 	repo          repository.Transactions
 	clientService Clients
-	clientQueues  map[int]chan domain.Transaction
 }
 
 func (t *TransactionService) FindAll(ctx context.Context) ([]domain.Transaction, error) {
@@ -50,7 +49,7 @@ func (t *TransactionService) Create(ctx context.Context, transactionDto dto.Crea
 		return domain.Transaction{}, err
 	}
 
-	t.clientQueues[int(transactionDto.SenderId)] <- transaction
+	t.clientService.GetClientQueues()[transactionDto.SenderId] <- transaction
 
 	return transaction, err
 }
@@ -92,25 +91,24 @@ func NewTransactionService(repo repository.Transactions, clientService Clients) 
 		return nil, fmt.Errorf("failed to find clients: %w", err)
 	}
 
-	clientQueues := make(map[int]chan domain.Transaction, len(clients))
-
 	transactionService := &TransactionService{
 		repo:          repo,
 		clientService: clientService,
-		clientQueues:  clientQueues,
 	}
 
+	clientQueues := transactionService.clientService.GetClientQueues()
+
 	for _, client := range clients {
-		id := int(client.Id)
+		id := client.Id
 		clientQueues[id] = make(chan domain.Transaction, 64)
 		createdTransactions, err := transactionService.FindByStatusAndId(
-			context.Background(), "created", client.Id)
+			context.Background(), "created", id)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get client transactions with id: %d: %w",
 				client.Id, err)
 		}
 
-		log.Printf("client %d", client.Id)
+		log.Printf("client %d", id)
 		log.Printf("transactions %v", createdTransactions)
 
 		for _, transaction := range createdTransactions {
