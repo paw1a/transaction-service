@@ -201,7 +201,7 @@ curl --location --request POST 'http://localhost:8080/api/transactions/' \
 }
 ```
 
-## POST /api/clients/:id/transactions
+## GET /api/clients/:id/transactions
 Получение списка транзакций конкретного клиента с id
 
 Запрос:
