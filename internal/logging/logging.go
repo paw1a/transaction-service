@@ -2,17 +2,10 @@ package logging
 
 import (
 	"github.com/sirupsen/logrus"
-	"log"
-	"os"
 	"runtime"
 )
 
 func init() {
-	file, err := os.OpenFile("transaction.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-	if err != nil {
-		log.Fatalf("failed to open log file %v", err)
-	}
-
 	logrus.SetReportCaller(true)
 	logrus.SetLevel(logrus.DebugLevel)
 	formatter := &logrus.TextFormatter{
@@ -23,5 +16,4 @@ func init() {
 		},
 	}
 	logrus.SetFormatter(formatter)
-	logrus.SetOutput(file)
 }

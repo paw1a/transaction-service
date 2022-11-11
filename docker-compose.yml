@@ -21,8 +21,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      - ./.bin/:/app/
     environment:
       PORT: 8080
       DB_USERNAME: 'username'
@@ -36,27 +34,32 @@ services:
       - '8080:8080'
     networks:
       - backend
-    restart: always
-
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4:5.7
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "paw1a@yandex.ru"
-      PGADMIN_DEFAULT_PASSWORD: "123"
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-    ports:
-      - "5050:80"
-    restart: always
     deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 1G
-    depends_on:
-      - db
-    networks:
-      - backend
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 10
+        window: 20s
+
+#  pgadmin:
+#    container_name: pgadmin
+#    image: dpage/pgadmin4:5.7
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: "paw1a@yandex.ru"
+#      PGADMIN_DEFAULT_PASSWORD: "123"
+#      PGADMIN_CONFIG_SERVER_MODE: "False"
+#    ports:
+#      - "5050:80"
+#    restart: always
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '2'
+#          memory: 1G
+#    depends_on:
+#      - db
+#    networks:
+#      - backend
 
 networks:
   backend:

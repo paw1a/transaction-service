@@ -1,10 +1,10 @@
-create table clients (
+create table if not exists clients (
     id bigserial primary key,
     name varchar(255) not null,
     balance bigint not null
 );
 
-create table transactions (
+create table if not exists transactions (
     id bigserial primary key,
     sender_id bigserial,
     receiver_id bigserial,
