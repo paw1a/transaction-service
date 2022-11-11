@@ -32,13 +32,30 @@ func (h *Handler) clientFindById(context *gin.Context) {
 		return
 	}
 
-	client, err := h.clientService.FindByID(context.Request.Context(), id)
+	client, err := h.clientService.FindById(context.Request.Context(), int64(id))
 	if err != nil {
 		internalErrorResponse(context, fmt.Errorf("client with id: %d not found", id))
 		return
 	}
 
 	successResponse(context, client)
+}
+
+func (h *Handler) transactionFindByClientId(context *gin.Context) {
+	id, err := strconv.Atoi(context.Param("id"))
+	if err != nil {
+		badRequestResponse(context,
+			fmt.Sprintf("invalid client id param"), err)
+		return
+	}
+
+	transactions, err := h.clientService.FindTransactionsById(context.Request.Context(), int64(id))
+	if err != nil {
+		internalErrorResponse(context, fmt.Errorf("transactions for client with id: %d not found", id))
+		return
+	}
+
+	successResponse(context, transactions)
 }
 
 func (h *Handler) clientCreate(context *gin.Context) {
@@ -65,7 +82,7 @@ func (h *Handler) clientDelete(context *gin.Context) {
 		return
 	}
 
-	err = h.clientService.Delete(context.Request.Context(), clientId)
+	err = h.clientService.Delete(context.Request.Context(), int64(clientId))
 	if err != nil {
 		errorResponse(context, http.StatusInternalServerError, err.Error())
 		return

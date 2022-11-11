@@ -24,6 +24,7 @@ func NewHandler(conn *sqlx.DB) *Handler {
 	if err != nil {
 		log.Fatalf("failed to init transaction service: %v", err)
 	}
+	clientService.SetTransactionService(transactionService)
 
 	return &Handler{
 		clientService:      clientService,
@@ -52,6 +53,7 @@ func (h *Handler) initAPI(router *gin.Engine) {
 		{
 			clientsApi.GET("/", h.clientFindAll)
 			clientsApi.GET("/:id", h.clientFindById)
+			clientsApi.GET("/:id/transactions", h.transactionFindByClientId)
 			clientsApi.POST("/", h.clientCreate)
 			clientsApi.DELETE("/:id", h.clientDelete)
 		}

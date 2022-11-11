@@ -29,6 +29,7 @@ services:
       DB_PASSWORD: 'password'
       DB_HOST: 'db'
       DB_NAME: 'test_db'
+      TRANSFER_TIME: 10
     depends_on:
       - db
     ports:

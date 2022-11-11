@@ -5,19 +5,26 @@ import (
 	"github.com/paw1a/transaction-service/internal/domain"
 	"github.com/paw1a/transaction-service/internal/domain/dto"
 	"github.com/paw1a/transaction-service/internal/repository"
+	"os"
+	"strconv"
+	"time"
 )
 
 type ClientService struct {
-	repo         repository.Clients
-	clientQueues map[int64]chan domain.Transaction
+	repo               repository.Clients
+	transactionService Transactions
 }
 
 func (c *ClientService) FindAll(ctx context.Context) ([]domain.Client, error) {
 	return c.repo.FindAll(ctx)
 }
 
-func (c *ClientService) FindByID(ctx context.Context, clientId int) (domain.Client, error) {
-	return c.repo.FindByID(ctx, clientId)
+func (c *ClientService) FindById(ctx context.Context, clientId int64) (domain.Client, error) {
+	return c.repo.FindById(ctx, clientId)
+}
+
+func (c *ClientService) FindTransactionsById(ctx context.Context, clientId int64) ([]domain.Transaction, error) {
+	return c.repo.FindTransactionsById(ctx, clientId)
 }
 
 func (c *ClientService) Create(ctx context.Context, clientDto dto.CreateClientDto) (domain.Client, error) {
@@ -29,26 +36,28 @@ func (c *ClientService) Create(ctx context.Context, clientDto dto.CreateClientDt
 		return domain.Client{}, err
 	}
 
-	c.clientQueues[client.Id] = make(chan domain.Transaction, 64)
+	c.transactionService.ProcessTransactionQueue(client.Id)
 
 	return client, err
 }
 
-func (c *ClientService) Delete(ctx context.Context, clientId int) error {
+func (c *ClientService) Delete(ctx context.Context, clientId int64) error {
 	return c.repo.Delete(ctx, clientId)
 }
 
 func (c *ClientService) Transfer(senderId int64, receiverId int64, amount int64) error {
+	sleepTime, _ := strconv.Atoi(os.Getenv("TRANSFER_TIME"))
+	// sleep to demonstrate transaction queue
+	time.Sleep(time.Duration(sleepTime) * time.Second)
 	return c.repo.Transfer(senderId, receiverId, amount)
 }
 
-func (c *ClientService) GetClientQueues() map[int64]chan domain.Transaction {
-	return c.clientQueues
+func (c *ClientService) SetTransactionService(transactionService Transactions) {
+	c.transactionService = transactionService
 }
 
 func NewClientService(repo repository.Clients) *ClientService {
 	return &ClientService{
-		repo:         repo,
-		clientQueues: make(map[int64]chan domain.Transaction),
+		repo: repo,
 	}
 }

@@ -13,14 +13,15 @@ import (
 type TransactionService struct {
 	repo          repository.Transactions
 	clientService Clients
+	clientQueues  map[int64]chan domain.Transaction
 }
 
 func (t *TransactionService) FindAll(ctx context.Context) ([]domain.Transaction, error) {
 	return t.repo.FindAll(ctx)
 }
 
-func (t *TransactionService) FindByID(ctx context.Context, transactionId int) (domain.Transaction, error) {
-	return t.repo.FindByID(ctx, transactionId)
+func (t *TransactionService) FindById(ctx context.Context, transactionId int64) (domain.Transaction, error) {
+	return t.repo.FindById(ctx, transactionId)
 }
 
 func (t *TransactionService) FindByStatusAndId(ctx context.Context, status string, id int64) ([]domain.Transaction, error) {
@@ -49,7 +50,7 @@ func (t *TransactionService) Create(ctx context.Context, transactionDto dto.Crea
 		return domain.Transaction{}, err
 	}
 
-	t.clientService.GetClientQueues()[transactionDto.SenderId] <- transaction
+	t.clientQueues[transactionDto.SenderId] <- transaction
 
 	return transaction, err
 }
@@ -91,12 +92,12 @@ func NewTransactionService(repo repository.Transactions, clientService Clients) 
 		return nil, fmt.Errorf("failed to find clients: %w", err)
 	}
 
+	clientQueues := make(map[int64]chan domain.Transaction, len(clients))
 	transactionService := &TransactionService{
 		repo:          repo,
 		clientService: clientService,
+		clientQueues:  clientQueues,
 	}
-
-	clientQueues := transactionService.clientService.GetClientQueues()
 
 	for _, client := range clients {
 		id := client.Id
@@ -119,4 +120,9 @@ func NewTransactionService(repo repository.Transactions, clientService Clients) 
 	}
 
 	return transactionService, nil
+}
+
+func (t *TransactionService) ProcessTransactionQueue(id int64) {
+	t.clientQueues[id] = make(chan domain.Transaction, 64)
+	go t.processClientQueue(t.clientQueues[id])
 }

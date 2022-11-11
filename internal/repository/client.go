@@ -13,16 +13,23 @@ type ClientRepo struct {
 
 func (c *ClientRepo) FindAll(ctx context.Context) ([]domain.Client, error) {
 	var clients []domain.Client
-	statement := "select * from clients"
+	statement := "select * from clients order by id asc"
 	err := c.conn.SelectContext(ctx, &clients, statement)
 	return clients, err
 }
 
-func (c *ClientRepo) FindByID(ctx context.Context, clientId int) (domain.Client, error) {
+func (c *ClientRepo) FindById(ctx context.Context, clientId int64) (domain.Client, error) {
 	statement := "select * from clients where id = $1"
 	var client domain.Client
 	err := c.conn.GetContext(ctx, &client, statement, clientId)
 	return client, err
+}
+
+func (c *ClientRepo) FindTransactionsById(ctx context.Context, clientId int64) ([]domain.Transaction, error) {
+	statement := "select * from transactions where sender_id = $1 order by id asc"
+	var transactions []domain.Transaction
+	err := c.conn.SelectContext(ctx, &transactions, statement, clientId)
+	return transactions, err
 }
 
 func (c *ClientRepo) Create(ctx context.Context, client domain.Client) (domain.Client, error) {
@@ -33,7 +40,7 @@ func (c *ClientRepo) Create(ctx context.Context, client domain.Client) (domain.C
 	return client, err
 }
 
-func (c *ClientRepo) Delete(ctx context.Context, clientId int) error {
+func (c *ClientRepo) Delete(ctx context.Context, clientId int64) error {
 	statement := "delete from clients where id = $1"
 	_, err := c.conn.ExecContext(ctx, statement, clientId)
 	return err

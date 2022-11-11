@@ -32,7 +32,7 @@ func (h *Handler) transactionFindById(context *gin.Context) {
 		return
 	}
 
-	transaction, err := h.transactionService.FindByID(context.Request.Context(), id)
+	transaction, err := h.transactionService.FindById(context.Request.Context(), int64(id))
 	if err != nil {
 		internalErrorResponse(context, fmt.Errorf("transaction with id: %d not found", id))
 		return

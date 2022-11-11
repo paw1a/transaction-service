@@ -18,7 +18,7 @@ func (c *TransactionRepo) FindAll(ctx context.Context) ([]domain.Transaction, er
 	return transactions, err
 }
 
-func (c *TransactionRepo) FindByID(ctx context.Context, transactionId int) (domain.Transaction, error) {
+func (c *TransactionRepo) FindById(ctx context.Context, transactionId int64) (domain.Transaction, error) {
 	statement := "select * from transactions where id = $1"
 	var transaction domain.Transaction
 	err := c.conn.GetContext(ctx, &transaction, statement, transactionId)
